@@ -54,3 +54,46 @@ def test_read_users(client):
             }
         ]
     }
+
+
+def test_update_user(client):
+    response = client.put(
+        '/users/1',
+        json={
+            'password': '',
+            'username': 'testusername2',
+            'id': 1,
+            'email': 'test@test.com',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'username': 'testusername2',
+        'id': 1,
+        'email': 'test@test.com',
+    }
+
+    # Teste 404 not found
+
+    response = client.put(
+        '/users/2',
+        json={
+            'password': '',
+            'username': 'testusername2',
+            'id': 1,
+            'email': 'test@test.com',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_delete_user(client):
+    response = client.delete('/users/1')
+
+    assert response.json() == {'message': 'User deleted'}
+
+    response = client.delete('/users/2')
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
