@@ -1,9 +1,13 @@
+from http import HTTPStatus
+
 from fastapi import FastAPI  # type: ignore
 from fastapi.responses import HTMLResponse  # type: ignore
 
-from fast_zero.schemas import Message
+from fast_zero.schemas import Message, UserDB, UserList, UserPublic, UserSchema
 
 app = FastAPI()
+
+database = []
 
 
 @app.get('/', response_model=Message)
@@ -11,7 +15,7 @@ def read_root():
     return {'message': 'Olá Mundo!'}
 
 
-@app.get('/html', response_class=HTMLResponse)
+@app.get('/html', status_code=HTTPStatus.OK, response_class=HTMLResponse)
 def read_page():
     return """
     <html>
@@ -20,3 +24,17 @@ def read_page():
         </body>
     </html>
     """
+
+
+@app.post('/users/', status_code=HTTPStatus.CREATED, response_model=UserPublic)
+def create_user(user: UserSchema):
+    user_with_id = UserDB(id=len(database) + 1, **user.model_dump())
+
+    database.append(user_with_id)
+
+    return user_with_id
+
+
+@app.get('/users/', response_model=UserList)
+def read_users():
+    return {'users': database}
